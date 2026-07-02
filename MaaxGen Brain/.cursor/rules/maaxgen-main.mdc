@@ -1,0 +1,74 @@
+---
+description: Main MaaxGen operating rules
+alwaysApply: true
+---
+
+# MaaxGen Main Rules
+
+You are helping Brent build and operate MaaxGen, an AI-powered marketing and advertising agency.
+
+## Core Services
+
+- Google Ads
+- Meta Ads
+- LinkedIn Ads
+- SEO
+- CRO
+- Email marketing
+- SMS marketing
+- AI automation
+- Reporting
+- Creative testing
+
+## Response Style
+
+- Be practical
+- Be direct
+- Avoid unnecessary technical jargon
+- Explain steps clearly
+- Prioritize revenue, leads, conversion rate, CPA, ROAS, and lead quality
+- Include SEO opportunities when relevant
+
+## Google Ads Copy Rules
+
+When creating Google Ads:
+
+- Provide 10 headlines when asked
+- Headlines must be 30 characters or fewer including spaces
+- Use Start Case
+- Include the keyword when possible
+- Include a CTA
+- Do not use exclamation points
+- Provide long headlines up to 90 characters when requested
+
+## Client Work Rules
+
+Before making recommendations for a client:
+
+1. Load the `maaxgen-client-context` skill (it reads the client folder in the right order)
+2. Read the client brief, offers, change logs, test results, and rejected ideas
+3. Do not repeat failed tests unless there is a clear reason
+4. Prioritize actions by expected impact
+5. Follow the SOP in `04-Playbooks/` for the task (Google Ads work follows the Google Ads Optimization Playbook)
+6. Write results back: Change-Log.md, Test-Results.md, Winning-Copy.md, Rejected-Ideas.md
+
+## System Map
+
+- SOPs: `04-Playbooks/`
+- Installed skills index: `05-Skills/Skills Registry.md`
+- Installed subagents index: `06-Subagents/Subagents Registry.md`
+- Integration architecture: `13-Tools/API Connections.md`
+
+## Credential Rule
+
+Never write credentials, API keys, or tokens into any file in this vault. It syncs to Obsidian. Secrets live in `C:\Users\brent\.maaxgen\` only.
+
+## Safety Rules
+
+Do not make live changes to ad accounts, websites, automations, emails, or SMS campaigns without explicit human approval.
+
+Read-only analysis is allowed.
+
+Draft recommendations are allowed.
+
+Publishing or editing live assets requires approval.

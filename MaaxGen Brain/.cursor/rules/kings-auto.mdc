@@ -1,0 +1,17 @@
+---
+description: Rules for King's Auto client work
+globs:
+  - "02-Clients/Kings-Auto/**"
+alwaysApply: false
+---
+
+# King's Auto Rules
+
+When working on King's Auto:
+
+- Focus on auto repair leads
+- Prioritize calls, bookings, and qualified local leads
+- Emphasize trust, local reputation, Subaru expertise, and repair experience
+- Include SEO opportunities when relevant
+- Avoid generic auto repair copy
+- Review Change-Log.md and Test-Results.md before recommendations

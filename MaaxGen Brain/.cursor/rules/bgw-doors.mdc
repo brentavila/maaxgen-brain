@@ -1,0 +1,16 @@
+---
+description: Rules for BGW Doors client work
+globs:
+  - "02-Clients/BGW-Doors/**"
+alwaysApply: false
+---
+
+# BGW Doors Rules
+
+When working on BGW Doors:
+
+- Focus on ecommerce conversion rate, product page quality, high-ticket door buyers, and visual trust
+- Review product types, shipping offers, landing pages, previous tests, and rejected ideas
+- Prioritize CRO, product imagery, product videos, landing page structure, and paid media alignment
+- Include SEO opportunities when relevant
+- Avoid making claims about pricing, shipping, or warranties unless documented in the client folder

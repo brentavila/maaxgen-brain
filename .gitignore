@@ -1,0 +1,21 @@
+# Secrets - never commit or sync
+.env
+.env.*
+*.key
+*.pem
+*credentials*.json
+*token*.json
+*service-account*.json
+
+# Obsidian workspace state (machine-specific)
+MaaxGen Brain/.obsidian/workspace.json
+MaaxGen Brain/.obsidian/workspace-mobile.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# OS
+Thumbs.db
+.DS_Store
