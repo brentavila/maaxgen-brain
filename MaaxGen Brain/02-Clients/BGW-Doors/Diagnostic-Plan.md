@@ -5,6 +5,8 @@
 **Budget:** ~$8,500–$10,000/mo Google Ads + Microsoft + Amazon  
 **Primary channel:** Performance Max (Shopping) — US (excl. CA) + California + Brand Search  
 
+> **Data analysis complete (Jul 9, 2026):** See `Data/Analysis/summary.md`, `geo-reconciliation.md`, `feed-title-audit.md`, and `ga4-snapshot.md`. Key finding: **tracking must be fixed first** — GA4 shows 44 purchases YTD vs 566 checkouts; Ads likely optimizing on inflated conversions.
+
 ---
 
 ## Executive Summary
@@ -19,7 +21,7 @@ Kevin and Brent are right to suspect Google Ads is underperforming, but **the ro
 
 **This plan follows MaaxGen's Google Ads Optimization Playbook order:** fix data → fix bleed → fix geo → fix assets/feed → then restructure bidding.
 
-> **Data gap:** Shopify customer-by-location export (720 days), `product_export_1.csv`, and GA4 YTD export were referenced but are not yet in `02-Clients/BGW-Doors/Data/`. Drop them there so analysis can begin. Until then, Phase 1–2 work below uses the diagnostic framework; numbers will be filled in once exports arrive.
+> **Data gap:** ~~Shopify customer-by-location export (720 days), `product_export_1.csv`, and GA4 YTD export were referenced but are not yet in `02-Clients/BGW-Doors/Data/`.~~ **Resolved** — exports merged. Analysis in `Data/Analysis/`.
 
 ---
 

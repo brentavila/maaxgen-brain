@@ -20,7 +20,7 @@ Improve Merchant Center quality so BGW Doors products are more eligible, more co
 
 ## Current Status
 
-TBD
+TBD — run import from `Data/products_export_gmc_optimized.csv` (see [[Shopify-GMC-Import-Guide]]).
 
 ## Key Questions
 
