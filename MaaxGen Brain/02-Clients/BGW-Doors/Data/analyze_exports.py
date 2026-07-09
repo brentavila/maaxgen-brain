@@ -11,19 +11,35 @@ from pathlib import Path
 BASE = Path(__file__).resolve().parent
 EXPORTS = BASE / "Exports"
 ANALYSIS = BASE / "Analysis"
+SEARCH_DIRS = (EXPORTS, BASE)  # CSVs may live in Data/ or Data/Exports/
 
 
 def find_file(patterns: list[str]) -> Path | None:
-    if not EXPORTS.exists():
-        return None
-    for path in sorted(EXPORTS.iterdir()):
-        if not path.is_file():
+    candidates: list[Path] = []
+    for directory in SEARCH_DIRS:
+        if not directory.exists():
             continue
+        for path in sorted(directory.iterdir()):
+            if path.is_file() and path.suffix.lower() in {".csv", ".tsv"}:
+                candidates.append(path)
+
+    for path in candidates:
         name = path.name.lower()
         for pat in patterns:
             if re.search(pat, name, re.I):
                 return path
     return None
+
+
+def list_data_files() -> list[str]:
+    files: list[str] = []
+    for directory in SEARCH_DIRS:
+        if not directory.exists():
+            continue
+        for path in sorted(directory.iterdir()):
+            if path.is_file() and path.suffix.lower() in {".csv", ".tsv"}:
+                files.append(str(path.relative_to(BASE)))
+    return files
 
 
 def read_csv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
@@ -279,6 +295,12 @@ def main() -> None:
     ga4_path = find_file([r"ga4", r"analytics"])
 
     summary_lines = ["# BGW Exports Analysis Summary\n"]
+    found = list_data_files()
+    if found:
+        summary_lines.append("## CSV Files Found\n")
+        for f in found:
+            summary_lines.append(f"- `{f}`")
+        summary_lines.append("")
 
     if shopify_path and ads_path:
         shopify = analyze_shopify_customers(shopify_path)
@@ -312,7 +334,7 @@ def main() -> None:
         summary_lines.append("\n## Missing Files\n")
         for m in missing:
             summary_lines.append(f"- {m}")
-        summary_lines.append(f"\nPlace files in: `{EXPORTS}`")
+        summary_lines.append(f"\nPlace files in: `{BASE}` or `{EXPORTS}` and commit to GitHub.")
 
     (ANALYSIS / "summary.md").write_text("\n".join(summary_lines) + "\n", encoding="utf-8")
     print((ANALYSIS / "summary.md").read_text())
