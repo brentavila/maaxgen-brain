@@ -18,7 +18,10 @@ From data analysis (Jul 9, 2026). Full reports in `Data/Analysis/`.
 
 ## P1 — Feed & PMax
 
-- [ ] Populate **custom labels** in Shopify (material, margin, pre-hung vs slab, in-stock)
+- [ ] **Import** `Data/products_export_gmc_optimized.csv` into Shopify (see [[Shopify-GMC-Import-Guide]])
+- [ ] Align product pages so visible titles include "Pre-Hung" (Google feed match requirement)
+- [ ] Populate **custom labels** via import (wood/fiberglass/iron, hero, pre-hung config)
+- [ ] Apply **location targeting** per [[Google-Ads-Location-Targeting]] (after tracking verified)
 - [ ] Segment PMax asset groups: Wood / Fiberglass / Iron (wood gets 45% budget)
 - [ ] Review why **slab doors** are top GA4 purchase item — limit slab in listing groups if margin is lower
 
