@@ -9,10 +9,12 @@ From data analysis (Jul 9, 2026). Full reports in `Data/Analysis/`.
 
 ## P1 — Geo (after tracking verified)
 
-- [ ] Export **state-level** Google Ads location report for national PMax (US excl. CA). Current report hides ~$119k in "Other locations."
-- [ ] **National Tier A states** to prioritize (≥10 Shopify customers): FL, NY, NJ, VA, TX, NC, PA, WA, GA, MD, AZ, MI, NV, AL, IL
-- [ ] **CA exclude test** (≥$100 spend, ≤1 customer): San Diego County, Santa Clara County, Fresno County
-- [ ] **CA scale** (proven customers, under-spent): Ontario (10 customers, $59 spend), Inland Empire cities (Fontana, Rancho Cucamonga, Chino)
+- [ ] **Restrict Sales-Performance Max-19** to Tier A states: FL, NY, NJ, VA, TX, NC, PA, WA, GA, MD, AZ, MI, NV, AL, IL (331 customers, 52% of base outside CA)
+- [ ] **Deprioritize/exclude** states with <5 Shopify customers (OR, HI, OH, KS, ID, MO, etc.)
+- [ ] **Protect Brand Search** — $16,527 spend, 167 conv ($99 CPA); best campaign in location report
+- [ ] **CA exclude test:** San Diego County ($2,182), Santa Clara County ($857), Fresno County ($319)
+- [ ] **CA scale:** Ontario (10 customers, $59 spend), San Jose (15 customers, $538 spend)
+- [ ] Optional: Export state-level report filtered to **Sales-Performance Max-19 only** ($119k still in "Other locations")
 
 ## P1 — Feed & PMax
 

@@ -46,27 +46,43 @@ def load_shopify() -> tuple[dict[str, int], dict[str, int], int]:
     return dict(by_state), dict(by_city_ca), total
 
 
-def load_ads_ca() -> tuple[list[dict], dict[str, float]]:
-    path = BASE / "BGW Doors Location report Last 720 Days - BGW Doors Location report Last 720 Days.csv"
+def load_ads() -> tuple[list[dict], dict[str, float], list[dict]]:
+    """Load location report; prefer nationwide file if present."""
+    candidates = [
+        BASE / "BGW Doors Location report Nationwide Last 720 Days.csv",
+        BASE / "BGW Doors Location report Last 720 Days - BGW Doors Location report Last 720 Days.csv",
+    ]
+    path = next((p for p in candidates if p.exists()), candidates[-1])
     lines = path.read_text(encoding="utf-8-sig").splitlines()
     start = next(i for i, line in enumerate(lines) if line.startswith("Location,"))
-    rows = []
+    rows: list[dict] = []
+    campaigns: list[dict] = []
     totals: dict[str, float] = {}
     for row in csv.DictReader(lines[start:]):
         loc = row.get("Location", "")
         if loc.startswith("Total:"):
             totals[loc] = float((row.get("Cost") or "0").replace(",", ""))
             continue
-        if not loc or "California" not in loc:
+        if not loc:
             continue
-        rows.append({
+        camp = row.get("Campaign", "")
+        cost = float((row.get("Cost") or "0").replace(",", ""))
+        conv = float((row.get("Conversions") or "0").replace(",", ""))
+        clicks = int(float((row.get("Interactions") or "0").replace(",", "")))
+        entry = {
             "location": loc,
-            "city": loc.split(",")[0].strip().strip('"'),
-            "cost": float((row.get("Cost") or "0").replace(",", "")),
-            "conv": float((row.get("Conversions") or "0").replace(",", "")),
-            "clicks": int(float((row.get("Interactions") or "0").replace(",", ""))),
-        })
-    return rows, totals
+            "campaign": camp,
+            "city": loc.split(",")[0].strip().strip('"') if "," in loc else loc,
+            "cost": cost,
+            "conv": conv,
+            "clicks": clicks,
+            "is_us_country": loc.strip() == "United States",
+            "is_ca": "California" in loc,
+        }
+        rows.append(entry)
+        if entry["is_us_country"]:
+            campaigns.append({**entry, "location": loc})
+    return rows, totals, campaigns
 
 
 def match_shopify_city(city: str, by_city_ca: dict[str, int]) -> int:
@@ -79,35 +95,67 @@ def match_shopify_city(city: str, by_city_ca: dict[str, int]) -> int:
     return 0
 
 
-def geo_report(by_state: dict[str, int], by_city_ca: dict[str, int], total: int, ads_rows: list[dict], totals: dict[str, float]) -> str:
+def geo_report(by_state: dict[str, int], by_city_ca: dict[str, int], total: int, ads_rows: list[dict], totals: dict[str, float], campaigns: list[dict]) -> str:
+    national_customers = sum(n for s, n in by_state.items() if s and s != "CA")
+    tier_a = [s for s, n in by_state.items() if n >= 10 and s and s != "CA"]
+    tier_scale = [s for s, n in by_state.items() if n >= 15 and s and s != "CA"]
+
+    nat_pmax = next((c for c in campaigns if "Sales-Performance Max" in c["campaign"]), None)
+    brand = next((c for c in campaigns if "Search - Brand" in c["campaign"]), None)
+    other_cost = totals.get("Total: Other locations", 0)
+    nat_visible = nat_pmax["cost"] if nat_pmax else 0
+    nat_conv_visible = nat_pmax["conv"] if nat_pmax else 0
+
     lines = [
         "# Geo Reconciliation — Shopify vs Google Ads\n",
         f"**Shopify:** {total} new customer records (Jul 19, 2024 – Jul 9, 2026)  ",
-        f"**Google Ads:** ${totals.get('Total: Account', 0):,.0f} spend, {720} days (location report)\n",
-        "> Note: City-level location data in this export is **California only** (Performance Max: California). "
-        "National spend (~$119k) appears under \"Total: Other locations\" — request a **state-level** location report for the US excl. CA campaign.\n",
-        "## National — Shopify Customer Hot States\n",
-        "Use these states as Tier A targets for the national PMax campaign once tracking is fixed:\n",
-        "| State | Customers | % of Total | Ads Data Available |",
-        "|-------|----------:|-----------:|--------------------|",
+        f"**Google Ads:** ${totals.get('Total: Account', 0):,.0f} spend over 720 days\n",
+        "## National Campaign Summary\n",
+        f"- **331 customers (52%)** are outside California — national geo targeting matters",
+        f"- **Sales-Performance Max-19** (national): ${nat_visible:,.0f} visible at country level, **{nat_conv_visible:.0f} conversions**",
+        f"- **\"Other locations\"** (unlisted geos): **${other_cost:,.0f}** — majority of national spend has **no state breakdown in this export**",
+        f"- **Implied national cost per Shopify customer:** ${(nat_visible + other_cost) / max(national_customers, 1):,.0f} over 720 days",
+        f"- **Brand Search** (United States): ${brand['cost']:,.0f}, {brand['conv']:.0f} conv — best-performing campaign in report\n" if brand else "",
+        "### Recommended National PMax Geo Target (excl. CA)\n",
+        "Restrict **Sales-Performance Max-19** to states with proven Shopify customers:\n",
+        f"**Tier 1 (≥15 customers):** {', '.join(tier_scale)}  ",
+        f"**Tier 2 (10–14 customers):** {', '.join(s for s in tier_a if s not in tier_scale)}  ",
+        "\nExclude or reduce: states with <5 customers (OR, HI, OH, KS, ID, MO, etc.) until tracking improves.\n",
+        "## National — Shopify vs Ads (State Level)\n",
+        "| State | Shopify Customers | % | Priority | Ads Spend Data |",
+        "|-------|------------------:|--:|----------|----------------|",
     ]
-    for state, n in sorted(by_state.items(), key=lambda x: -x[1])[:20]:
+    for state, n in sorted(by_state.items(), key=lambda x: -x[1]):
+        if not state or state == "CA":
+            continue
         pct = 100 * n / total
-        ads_note = "CA city report only" if state == "CA" else "Need state report"
-        lines.append(f"| {state or '(blank)'} | {n} | {pct:.1f}% | {ads_note} |")
-
-    tier_a = [s for s, n in by_state.items() if n >= 10 and s]
-    national_tier = [s for s in tier_a if s != "CA"]
-    lines.append(f"\n**Recommended national geo focus (≥10 customers, excl. CA):** {', '.join(national_tier)}\n")
+        if n >= 15:
+            pri, ads = "SCALE", "Not in export — target"
+        elif n >= 10:
+            pri, ads = "Tier A", "Not in export — target"
+        elif n >= 5:
+            pri, ads = "Monitor", "Optional"
+        else:
+            pri, ads = "Deprioritize", "Exclude candidate"
+        lines.append(f"| {state} | {n} | {pct:.1f}% | {pri} | {ads} |")
 
     lines += [
-        "## California — City Reconciliation\n",
+        "\n## Campaign Breakdown (country/region rows in export)\n",
+        "| Campaign | Location | Cost | Conversions | CPA |",
+        "|----------|----------|-----:|------------:|----:|",
+    ]
+    for c in sorted(campaigns, key=lambda x: -x["cost"]):
+        cpa = c["cost"] / c["conv"] if c["conv"] else 0
+        lines.append(f"| {c['campaign']} | {c['location']} | ${c['cost']:,.0f} | {c['conv']:.1f} | ${cpa:,.0f} |")
+
+    ca_rows = [r for r in ads_rows if r.get("is_ca")]
+    lines += [
+        "\n## California — City Reconciliation\n",
         "| City | Shopify Customers | Ads Cost | Ads Conv | Flag |",
         "|------|------------------:|---------:|---------:|------|",
     ]
-    ca_rows = []
     for city, cust in sorted(by_city_ca.items(), key=lambda x: -x[1])[:30]:
-        ads = next((r for r in ads_rows if norm_city(r["city"]) == norm_city(city)), None)
+        ads = next((r for r in ca_rows if norm_city(r["city"]) == norm_city(city)), None)
         cost = ads["cost"] if ads else 0
         conv = ads["conv"] if ads else 0
         if cost >= 100 and cust <= 1:
@@ -118,7 +166,6 @@ def geo_report(by_state: dict[str, int], by_city_ca: dict[str, int], total: int,
             flag = "Waste — review"
         else:
             flag = "Monitor"
-        ca_rows.append((cust, city, cost, conv, flag))
         lines.append(f"| {city} | {cust} | ${cost:,.0f} | {conv:.1f} | {flag} |")
 
     lines += [
@@ -126,7 +173,7 @@ def geo_report(by_state: dict[str, int], by_city_ca: dict[str, int], total: int,
         "| Location | Ads Cost | Ads Conv | Shopify Customers |",
         "|----------|----------:|---------:|------------------:|",
     ]
-    for r in sorted(ads_rows, key=lambda x: -x["cost"]):
+    for r in sorted(ca_rows, key=lambda x: -x["cost"]):
         cust = match_shopify_city(r["city"], by_city_ca)
         if r["cost"] >= 100 and cust <= 1:
             lines.append(f"| {r['city']} | ${r['cost']:,.0f} | {r['conv']:.1f} | {cust} |")
@@ -285,58 +332,64 @@ def ga4_report() -> str:
     return "\n".join(out) + "\n"
 
 
-def summary(by_state, total, totals, metrics) -> str:
-    purch = metrics.get("purchases", 44)
-    spend = totals.get("Total: Account", 0)
+def summary(by_state, total, totals, metrics, campaigns) -> str:
+    national_customers = sum(n for s, n in by_state.items() if s and s != "CA")
+    nat_pmax = next((c for c in campaigns if "Sales-Performance Max" in c["campaign"]), None)
+    brand = next((c for c in campaigns if "Search - Brand" in c["campaign"]), None)
+    other_cost = totals.get("Total: Other locations", 0)
+    nat_cost = (nat_pmax["cost"] if nat_pmax else 0) + other_cost
+
     return f"""# BGW Data Analysis Summary
 
-**Analysis date:** From merged GitHub exports
+**Analysis date:** Updated with nationwide location report
 
 ## Top Findings
 
-1. **Tracking is the #1 blocker.** GA4 shows 44 purchases YTD vs 566 checkouts (92% checkout abandonment). Google Ads reports 711 conversions over 720 days — likely inflated by micro-conversions, not purchases. Verify purchase is the only Primary action.
+1. **Tracking is the #1 blocker.** GA4: 44 purchases YTD vs 566 checkouts (92% abandonment). Ads: 711 conversions over 720 days — likely not purchases.
 
-2. **California dominates customers** — 260 of 640 (41%). National hot states: FL (41), NY (38), NJ (22), VA (18), TX (17). Use these for national PMax geo targeting.
+2. **National customers = 52% of base (331 of 640)** but national PMax shows only **7 conversions** on $12k visible spend; **$119k more in "Other locations"** with no state detail in export.
 
-3. **CA ads waste identified.** San Diego County: $2,182 spend, ~0 Shopify customers. Santa Clara County: $857. Ontario (10 customers): only $59 spend — under-invested in a proven market.
+3. **Restrict national PMax to proven states:** FL (41), NY (38), NJ (22), VA (18), TX (17), NC/PA/WA/GA (15 each), MD/AZ/MI/NV/AL/IL (10–13).
 
-4. **Feed uses wrong titles.** Featured products have good SEO titles but default titles lack "Pre-Hung" and "Front Door." Zero custom labels set. Merchant Center is not getting optimized data.
+4. **Brand Search is the bright spot:** ${brand['cost']:,.0f} / {brand['conv']:.0f} conv ($99 CPA) vs national PMax ~$1,760 CPA on visible row.
 
-5. **Slab doors outselling pre-hung in GA4.** Top item: "Slab Solid Wood Door - M300 Series" (10 units). PMax may be pushing wrong products.
+5. **CA waste persists:** San Diego County $2,182, Santa Clara $857, Fresno $319 — exclude candidates.
+
+6. **Feed + checkout** issues unchanged — SEO titles not in Merchant Center; slab doors top GA4 purchases.
+
+## National Geo Action (after tracking verified)
+
+Set **Sales-Performance Max-19** location targeting to Tier 1 + Tier 2 states only:
+`FL, NY, NJ, VA, TX, NC, PA, WA, GA, MD, AZ, MI, NV, AL, IL`
+
+Estimated national spend to reallocate: ~${nat_cost:,.0f} over 720 days (~${nat_cost/24:,.0f}/mo)
 
 ## Recommended Immediate Actions
 
 | Priority | Action | Owner |
 |----------|--------|-------|
-| P0 | Audit conversion actions — purchase only as Primary | Brent |
-| P0 | Configure Google & YouTube app to sync SEO title/description | Brent/Kevin |
-| P1 | Export **state-level** location report for US national PMax | Brent |
-| P1 | Exclude CA counties: San Diego County, Santa Clara County, Fresno County (test) | Brent (after approval) |
-| P1 | Add custom labels in Shopify feed | Brent |
-| P2 | Investigate checkout abandonment (shipping cost surprise?) | Kevin |
-| P2 | Import phone calls as secondary then primary conversion | Brent |
-| P2 | n8n Customer Match sync from Shopify | Brent |
+| P0 | Conversion audit — purchase only as Primary | Brent |
+| P0 | Sync SEO titles to Merchant Center feed | Brent/Kevin |
+| P1 | **Restrict national PMax to 15 Tier A states** (list above) | Brent (after approval) |
+| P1 | Exclude CA counties: San Diego, Santa Clara, Fresno | Brent (after approval) |
+| P1 | Protect Brand Search — do not cut budget | Brent |
+| P2 | Export state-level report filtered to Sales-Performance Max-19 only | Brent |
+| P2 | Checkout CRO — 92% checkout abandonment | Kevin |
 
 ## Files Generated
 
 - `Analysis/geo-reconciliation.md`
 - `Analysis/feed-title-audit.md`
 - `Analysis/ga4-snapshot.md`
-
-## Data Gaps
-
-- State-level Google Ads location report for national campaign ($119k in "Other locations")
-- Shopify revenue by state (export has customer counts, not dollar revenue)
-- Merchant Center diagnostics export
 """
 
 
 def main() -> None:
     by_state, by_city_ca, total = load_shopify()
-    ads_rows, totals = load_ads_ca()
+    ads_rows, totals, campaigns = load_ads()
 
     (ANALYSIS / "geo-reconciliation.md").write_text(
-        geo_report(by_state, by_city_ca, total, ads_rows, totals), encoding="utf-8"
+        geo_report(by_state, by_city_ca, total, ads_rows, totals, campaigns), encoding="utf-8"
     )
     (ANALYSIS / "feed-title-audit.md").write_text(feed_report(), encoding="utf-8")
     (ANALYSIS / "ga4-snapshot.md").write_text(ga4_report(), encoding="utf-8")
@@ -348,7 +401,7 @@ def main() -> None:
             vals = next(csv.reader([ga4_path.read_text(encoding="utf-8-sig").splitlines()[i + 1]]))
             metrics = {"purchases": int(vals[2])}
 
-    (ANALYSIS / "summary.md").write_text(summary(by_state, total, totals, metrics), encoding="utf-8")
+    (ANALYSIS / "summary.md").write_text(summary(by_state, total, totals, metrics, campaigns), encoding="utf-8")
     print((ANALYSIS / "summary.md").read_text())
 
 
