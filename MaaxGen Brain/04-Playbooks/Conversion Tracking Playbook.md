@@ -12,6 +12,7 @@ SOP for verifying that a client's conversion data can be trusted. This is the ga
 6. **Dedup GA4 vs Ads tag.** One source of truth per event, never both.
 7. **Enhanced Conversions.** Web EC on and verified in diagnostics. EC for Leads set up for any account with offline close-back.
 8. **Both-directions check.** Tags fire on the real event (Tag Assistant / DebugView) and Google Ads shows "Recording conversions" with recent timestamps.
+9. **GTM cross-check.** Use the **gtm** MCP and [[GTM Audit Playbook]] to confirm each Primary conversion action maps to one tag and one trigger, with no duplicate gtag/GTM/GA4 paths.
 
 ## Offline Close-Back (lead gen)
 

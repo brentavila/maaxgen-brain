@@ -20,7 +20,42 @@ Improve Merchant Center quality so BGW Doors products are more eligible, more co
 
 ## Current Status
 
-TBD — run import from `Data/products_export_gmc_optimized.csv` (see [[Shopify-GMC-Import-Guide]]).
+**Active import:** Run from `Data/products_export_gmc_optimized.csv` (see [[Shopify-GMC-Import-Guide]]).
+
+**Historical baseline** (feed export `products_2026-07-02_13-38-13.tsv`, pre–2026-07-02 offer):
+
+| Metric | Value |
+|---|---:|
+| Total variants | 292 |
+| In stock | 226 (77%) |
+| Out of stock | 66 (23%) |
+| Has sale price | 264 |
+| Missing `condition` | 78 |
+| In stock, no sale price | 12 |
+| Avg feed price | $5,181 |
+| Avg sale price discount | **12.8%** (not 20%) |
+
+### Discount distribution (price vs sale price) — historical
+
+| Bucket | Count |
+|---|---:|
+| <6% (compare-at only) | 14 |
+| 6–15% | 208 |
+| 15–25% | 40 |
+| 25%+ | 2 |
+
+**Superseded 2026-07-02:** Compare-at + sale + `FREESHIP2026` model replaced by single shelf price + 20% auto-applied at checkout + MC promotion. Re-export feed after Shopify import to refresh this section.
+
+### In-stock avg sale price by material (title-based) — historical
+
+| Material | Variants | Avg price | Min | Max |
+|---|---:|---:|---:|---:|
+| Fiberglass | 39 | $3,331 | $2,238 | $3,694 |
+| Wood | 131 | $4,377 | $2,846 | $6,278 |
+| Iron | 24 | $5,248 | $3,270 | $6,366 |
+| Other | 32 | $6,625 | $5,150 | $8,350 |
+
+All products share one Google product category (`Home doors`). No custom labels in use (populate via GMC optimized import).
 
 ## Key Questions
 
@@ -225,7 +260,18 @@ Possible labels:
 
 ## Current Promotions
 
-TBD
+**Summer Warehouse Sale — 20% off in-stock doors** (updated 2026-07-02)
+
+- Merchant Center promotion created/updated to align with Shopify offer
+- Shopify: single shelf price (compare-at = sell price); 20% automatic discount at checkout
+- Retired: feed-level compare-at / sale price stack + `FREESHIP2026` shipping coupon model
+
+### Post-change feed checks needed
+
+- [ ] Re-export feed (`products_*.tsv`) — prior export (2026-07-02) showed 264 sale prices, avg 12.8% discount; should reflect single-price model
+- [ ] Confirm MC promotion **approved** in Merchant Center
+- [ ] Confirm promotion surfaces on Shopping ads / free listings
+- [ ] Remove stale `sale price` attributes if Shopify no longer sends them
 
 ---
 

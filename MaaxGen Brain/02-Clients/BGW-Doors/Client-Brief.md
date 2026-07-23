@@ -35,7 +35,7 @@ Factory-direct pricing on premium, pre-hung exterior doors (cutting out the midd
 
 ## Secondary Offers
 
-Current Promo: 20% Off Summer Warehouse Sale (Promo code: _FREESHIP2026_).
+Current Promo: 20% Off Summer Warehouse Sale on in-stock doors. Discount **auto-applied at checkout** in Shopify (no manual coupon). Merchant Center promotion active. Retired 2026-07-02: `FREESHIP2026` compare-at + sale + shipping coupon model.
 
 ## Target Audience
 

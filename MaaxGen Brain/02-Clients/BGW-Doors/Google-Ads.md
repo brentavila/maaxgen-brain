@@ -584,4 +584,68 @@ Classify queries into:
 
 # Notes
 
-Add ongoing observations here.
+## 30-Day Baseline (2026-06-02 to 2026-07-01)
+
+Source: `Data/Raw.md` exports (campaign, time series, search, devices, networks, auction insights).
+
+### Account totals
+
+| Metric | Value |
+|---|---:|
+| Total spend | $9,623 |
+| Conversions | ~10 |
+| Conversion value | $13,128 |
+| ROAS | **1.36** |
+| CPA | **$963** |
+| Clicks | 13,191 |
+
+**Not profitable** for high-ticket ecom at typical door margins.
+
+### By campaign
+
+| Campaign | Spend | Clicks | Conv. | CPA | Notes |
+|---|---:|---:|---:|---:|---|
+| Sales-Performance Max-19 (US excl. CA) | $7,772 | 12,141 | 3.98 | $1,952 | 81% of spend; ~0.03% CVR |
+| Performance Max: California | $815 | 503 | 1.00 | $815 | New vs prior period |
+| Search - Brand | $733 | 198 | 5.00 | $147 | Best CPA; carries account |
+| Remarketing - Display | $303 | 349 | 0.00 | — | Zero conversions; pause candidate |
+| Standard Shopping - MicroBids | $0 | 0 | 0 | — | Inactive |
+
+### Pre vs post Summer Sale launch (Jun 18)
+
+| Period | Spend | Conv. | Conv. value | ROAS | CPA |
+|---|---:|---:|---:|---:|---:|
+| Jun 2–17 (pre-sale) | $4,609 | 6.0 | $12,028 | **2.61** | $769 |
+| Jun 18–Jul 1 (post-sale) | $5,014 | 4.0 | $1,100 | **0.22** | $1,254 |
+
+PMax spend also **+114% vs prior 30d** ($7,772 vs $3,624). Sale launch coincided with more spend and worse results.
+
+### Devices
+
+- **Mobile:** 75% of spend ($7,191), 7 conv., CPA ~$1,030
+- **Desktop:** $2,428, 3 conv., CPA ~$809
+
+### Brand search signals
+
+- Top query: `bgw doors` — 124 clicks, $372, 0 conv. in search terms report
+- **`bgw doors reviews`** — 6 clicks, $35, 0 conv. (trust research intent)
+- Legacy brand: `door destination` still getting clicks
+
+### Auction insights (overlap competitors)
+
+- iwantthatdoor.com, etodoors.com, gloryirondoors.com, renewalbyandersen.com
+- BGW impression share ~83% on brand auction set
+
+### Open gaps (still needed)
+
+- PMax product-level / asset group report
+- Location (city) report
+- Conversion action breakdown (purchase vs micro-conversions)
+- GA4 funnel to explain sub-$500 conversion values
+
+### Offer change (2026-07-02)
+
+- **Retired:** Compare-at + sale + `FREESHIP2026` coupon
+- **Live:** 20% off in-stock doors, auto-applied at checkout; single Shopify shelf price; MC promotion updated; website copy aligned
+- **Ad action:** Update PMax asset headlines/descriptions to "20% Off — Auto Applied At Checkout" (supportable). Do not re-scale PMax until 30d post-change metrics reviewed
+- **Baseline for comparison:** 1.36 ROAS, $963 CPA (Jun 2–Jul 1)

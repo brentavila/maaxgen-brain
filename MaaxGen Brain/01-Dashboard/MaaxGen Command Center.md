@@ -23,6 +23,7 @@
 
 - [[04-Playbooks/Google Ads Optimization Playbook|Google Ads Optimization Playbook]]
 - [[04-Playbooks/Conversion Tracking Playbook|Conversion Tracking Playbook]]
+- [[04-Playbooks/GTM Audit Playbook|GTM Audit Playbook]]
 - [[04-Playbooks/Monthly Reporting Playbook|Monthly Reporting Playbook]]
 - [[04-Playbooks/New Client Onboarding Playbook|New Client Onboarding Playbook]]
 
